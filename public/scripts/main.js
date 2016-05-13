@@ -1,5 +1,11 @@
 $(document).ready(function () {
-  var $find = $("#find");
+  var $nameFormRow = $("#nameFormRow");
+  var $nameForm = $("#nameForm");
+  var $name = $("#name");
+
+
+  var $searchRow = $("#searchRow");
+  var $search = $("#search");
   var $searchProgress = $("#searchProgress");
   var $progressBar = $("#progressBar");
   var $progressFlavorText = $("#progressFlavorText");
@@ -7,14 +13,14 @@ $(document).ready(function () {
   var $resultCandidate = $("#resultCandidate");
 
   var reviewers = [
-    "Aaron Mitchell (aaron)",
-    "Stephanie Yang (stpyang)",
-    "Berk Kapicioglu (berk)",
-    "Scott Snyder (ss)"
+    {name: "Aaron Mitchell", alias: "aaron"},
+    {name: "Stephanie Yang", alias: "stpyang"},
+    {name: "Berk Kapicioglu", alias: "berk"},
+    {name: "Scott Snyder", alias: "ss"}
   ];
 
-  $find.click(function () {
-    $find.attr('disabled', true);
+  $search.click(function () {
+    $search.attr('disabled', true);
     $searchProgress.css('visibility', 'visible');
 
     var duration = 8000;
@@ -35,8 +41,8 @@ $(document).ready(function () {
       if (now >= animateEnd) {
         window.clearInterval(animateInterval);
         $searchProgress.hide();
-        var reviewer = reviewers[Math.floor(Math.random() * 4)];
-        $resultCandidate.text(reviewer);
+        var reviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+        $resultCandidate.text(reviewer.name + " (" + reviewer.alias + ")");
         $result.show();
       } else if (now >= animatePhaseThreeStart) {
         $progressFlavorText.text("Filtering qualified candidate list...")
@@ -44,7 +50,39 @@ $(document).ready(function () {
         $progressFlavorText.text("Analyzing candidates' previous phabricator reviews...")
       }
     }, 100);
-
     $progressBar.addClass("grow");
-  })
+  });
+
+  function removeReviewer(name) {
+    var nameSegments = _.map(name.split(" "), function (segment) {
+      return segment.toLowerCase();
+    });
+    _.remove(reviewers, function (reviewer) {
+      var reviewerNameSegments = _.union(
+        _.map(reviewer.name.split(" "), function (segment) {
+          return segment.toLowerCase();
+        }),
+        reviewer.alias
+      );
+      return _.intersection(nameSegments, reviewerNameSegments).length !== 0
+    });
+  }
+
+  $nameForm.submit(function () {
+    var name = $name.val();
+    Cookies.set('name', name, {expires: 365});
+    removeReviewer(name);
+    $nameForm.hide();
+    $searchRow.show();
+    $search.click();
+    return false;
+  });
+
+  var cookieName = Cookies.get('name');
+  if (cookieName) {
+    removeReviewer(cookieName);
+    $searchRow.show();
+  } else {
+    $nameFormRow.show();
+  }
 });

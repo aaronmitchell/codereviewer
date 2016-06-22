@@ -16,7 +16,8 @@ $(document).ready(function () {
     {name: "Aaron Mitchell", alias: "aaron"},
     {name: "Stephanie Yang", alias: "stpyang"},
     {name: "Berk Kapicioglu", alias: "berk"},
-    {name: "Scott Snyder", alias: "ss"}
+    {name: "Scott Snyder", alias: "ss"},
+    {name: "Enrique Cruz", alias: "enriquecruz"}
   ];
 
   $search.click(function () {
